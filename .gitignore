@@ -1,0 +1,7 @@
+# Visual Studio user specific files
+.vs/
+*.sln
+
+# Binary Files
+Arcanoid/x64
+x64/
