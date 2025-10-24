@@ -11,6 +11,16 @@ HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
+enum EBrick_Type
+{
+   EBT_None,
+   EBT_Red,
+   EBT_Blue
+};
+
+HPEN Brick_Red_Pen, Brick_Blue_Pen;
+HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
+
 const int Global_Scale = 3;
 const int Brick_Width = 15;
 const int Brick_Height = 7;
@@ -18,6 +28,24 @@ const int Cell_Width = 16;
 const int Cell_Height = 8;
 const int Level_X_Offset = 8;
 const int Level_Y_Offset = 6;
+
+char Level_01[14][12] =
+{
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -82,12 +110,22 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hInstance      = hInstance;
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ARCANOID));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = CreateSolidBrush(RGB(0, 0, 0));
+    wcex.hbrBackground  = CreateSolidBrush(RGB(15, 63, 31));
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_ARCANOID);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassExW(&wcex);
+}
+//-----------------------------------------------------------------------------
+void Init()
+{// Setting up the game before start
+
+   Brick_Red_Pen = CreatePen(PS_SOLID, 0, RGB(255, 85, 85));
+   Brick_Red_Brush = CreateSolidBrush(RGB(255, 85, 85));
+
+   Brick_Blue_Pen = CreatePen(PS_SOLID, 0, RGB(85, 255, 255));
+   Brick_Blue_Brush = CreateSolidBrush(RGB(85, 255, 255));
 }
 //-----------------------------------------------------------------------------
 //
@@ -104,7 +142,9 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
-   
+
+   Init();
+
    RECT window_rect;
    window_rect.left = 0;
    window_rect.top = 0;
@@ -126,37 +166,51 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 //-----------------------------------------------------------------------------
-void Draw_Brick(HDC hdc, int x, int y, bool is_blue)
+void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
 {// Draw brick
+
    HPEN pen;
    HBRUSH brush;
 
-   if (is_blue)
+   switch (brick_type)
    {
-      pen = CreatePen(PS_SOLID, 0, RGB(85, 255, 255));
-      brush = CreateSolidBrush(RGB(85, 255, 255));
+   case EBT_None:
+      return;
+   case EBT_Red:
+      pen = Brick_Red_Pen;
+      brush = Brick_Red_Brush;
+      break;
+   case EBT_Blue:
+      pen = Brick_Blue_Pen;
+      brush = Brick_Blue_Brush;
+      break;
+   default:
+      return;
    }
-   else
-   {
-      pen = CreatePen(PS_SOLID, 0, RGB(255, 85, 255));
-      brush = CreateSolidBrush(RGB(255, 85, 255));
-   }      
    SelectObject(hdc, pen);
    SelectObject(hdc, brush);
 
-   Rectangle(hdc, x * Global_Scale, y * Global_Scale, 
-            (x + Brick_Width) * Global_Scale, (y + Brick_Height) * Global_Scale);
+
+   RoundRect(
+      hdc, x * Global_Scale, y * Global_Scale, 
+      (x + Brick_Width) * Global_Scale, (y + Brick_Height) * Global_Scale, 
+      2 * Global_Scale, 2 * Global_Scale);
 }
 //-----------------------------------------------------------------------------
-void Draw_Frame(HDC hdc)
-{// Draw game frame
-
+void Draw_Level(HDC hdc)
+{// Draw level's bricks
    int i, j;
 
    for (i = 0; i < 14; i++)
       for (j = 0; j < 12; j++)
          Draw_Brick(hdc, Level_X_Offset + j * Cell_Width, 
-                     Level_Y_Offset + i * Cell_Height, true);
+            Level_Y_Offset + i * Cell_Height, (EBrick_Type)Level_01[i][j]);
+}
+//-----------------------------------------------------------------------------
+void Draw_Frame(HDC hdc)
+{// Draw game frame
+
+   Draw_Level(hdc);
 }
 //-----------------------------------------------------------------------------
 //
