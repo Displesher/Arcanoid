@@ -1,5 +1,8 @@
 #include "Engine.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 enum EBrick_Type
 {
    EBT_None,
@@ -7,14 +10,20 @@ enum EBrick_Type
    EBT_Blue
 };
 
+enum ELetter_Type
+{
+   ELT_None,
+   ELT_O
+};
+
 HPEN Brick_Red_Pen, Brick_Blue_Pen;
 HPEN Platform_Circle_Pen, Platform_Inner_Pen;
-HPEN Highlight_Pen ;
+HPEN Highlight_Pen, Letter_Pen;
 
 HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
 HBRUSH Platform_Circle_Brush, Platform_Inner_Brush;
 
-
+double offset;
 const int Global_Scale = 3;
 const int Brick_Width = 15;
 const int Brick_Height = 7;
@@ -55,11 +64,12 @@ void Create_Pen_Brush(HPEN &pen, HBRUSH &brush,
 void Init()
 {// Setting up the game before start
 
-   Create_Pen_Brush(Brick_Red_Pen, Brick_Red_Brush, 255, 85, 85);
-   Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, 85, 255, 255);
-   Create_Pen_Brush(Platform_Circle_Pen, Platform_Circle_Brush, 151, 0, 0);
-   Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush, 0, 128, 192);
-   Highlight_Pen = CreatePen(PS_SOLID, 0, RGB(255, 255, 255));
+   Create_Pen_Brush(Brick_Red_Pen, Brick_Red_Brush, 185, 45, 50);
+   Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, 45, 140, 180);
+   Create_Pen_Brush(Platform_Circle_Pen, Platform_Circle_Brush, 170, 120, 80);
+   Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush, 200, 190, 170);
+   Highlight_Pen = CreatePen(PS_SOLID, 0, RGB(255, 245, 230));
+   Letter_Pen = CreatePen(PS_SOLID, 3, RGB(255, 245, 230));
 }
 //-----------------------------------------------------------------------------
 void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
@@ -90,6 +100,117 @@ void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
       hdc, x * Global_Scale, y * Global_Scale, 
       (x + Brick_Width) * Global_Scale, (y + Brick_Height) * Global_Scale, 
       2 * Global_Scale, 2 * Global_Scale);
+}
+//-----------------------------------------------------------------------------
+void Set_Brick_Letter_Color(bool is_switch_color, 
+   HPEN &front_pen, HPEN &back_pen, HBRUSH &front_brush, HBRUSH &back_brush)
+{
+   if (is_switch_color)
+   {// Front is red, back is blue
+      front_pen = Brick_Red_Pen;
+      front_brush = Brick_Red_Brush;
+      back_pen = Brick_Blue_Pen;
+      back_brush = Brick_Blue_Brush;
+   }
+   else
+   {// Front is blue, back is red
+      front_pen = Brick_Blue_Pen;
+      front_brush = Brick_Blue_Brush;
+      back_pen = Brick_Red_Pen;
+      back_brush = Brick_Red_Brush;
+   }
+}
+//-----------------------------------------------------------------------------
+void Rotate_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, 
+                                 ELetter_Type letter_type, int rotation_step)
+{// Draw fallen letter
+
+   bool switch_color;
+   double rotation_angle;
+   // Converting a step to a rotation angle
+   int brick_half_height = Brick_Height * Global_Scale / 2;
+   // int brick_half_height = Brick_Height / 2 * Global_Scale;
+   int back_part_offset;
+   HPEN front_pen, back_pen;
+   HBRUSH front_brush, back_brush;
+   XFORM xform, old_xform;
+
+   if (!(brick_type == EBT_Blue || brick_type == EBT_Red))
+      return; // falling letter may be only from such of these bricks
+
+   if (rotation_step > 4 && rotation_step <= 12)
+      switch_color = brick_type == EBT_Blue;
+   else
+      switch_color = brick_type == EBT_Red;
+   Set_Brick_Letter_Color(switch_color, front_pen, back_pen, 
+                                          front_brush, back_brush);
+
+   // Correct rotation step and rotation angle
+   rotation_step %= 16;
+   if (rotation_step < 8)
+      rotation_angle = 2.0 * M_PI / 16.0 * (double)rotation_step;
+   else
+      rotation_angle = 2.0 * M_PI / 16.0 * (double)(8 - rotation_step);
+   
+   if (rotation_step == 4 || rotation_step == 12)
+   {
+      // Draw background
+      SelectObject(hdc, back_pen);
+      SelectObject(hdc, back_brush);
+
+      Rectangle(hdc, x, y + brick_half_height - Global_Scale, 
+            x + Brick_Width * Global_Scale, 
+            y + brick_half_height);
+
+      // Draw foreground
+      SelectObject(hdc, front_pen);
+      SelectObject(hdc, front_brush);
+
+      Rectangle(hdc, x, y + brick_half_height, 
+            x + Brick_Width * Global_Scale,
+            y + brick_half_height + Global_Scale - 1);
+   }
+   else
+   {
+      SetGraphicsMode(hdc, GM_ADVANCED);
+      // Config rotate matrix of letter
+      xform.eM11 = 1.0f;
+      xform.eM12 = 0.0f;
+      xform.eM21 = 0.0f;
+      xform.eM22 = (float)cos(rotation_angle);
+      xform.eDx  = (float)x;
+      xform.eDy  = (float)y + (float)brick_half_height;
+      GetWorldTransform(hdc, &old_xform);
+      SetWorldTransform(hdc, &xform);
+
+      // Draw background
+      SelectObject(hdc, back_pen);
+      SelectObject(hdc, back_brush);
+
+      offset = 3.0 * (1.0 - fabs(xform.eM22)) * (double)Global_Scale;
+      back_part_offset = (int)round(offset);
+      Rectangle(hdc, 0, -brick_half_height - back_part_offset, 
+         Brick_Width * Global_Scale, brick_half_height - back_part_offset);
+      
+      // Draw foreground
+      SelectObject(hdc, front_pen);
+      SelectObject(hdc, front_brush);
+      
+      Rectangle(hdc, 0, -brick_half_height, 
+         Brick_Width * Global_Scale, brick_half_height);
+
+      if (rotation_step > 4 && rotation_step <= 12)
+      {
+         if (letter_type == ELT_O)
+         {
+            SelectObject(hdc, Letter_Pen);
+            Ellipse(hdc, (0 + 5) * Global_Scale, (-5 * Global_Scale) / 2, 
+               (0 + 10) * Global_Scale, 5 * Global_Scale / 2);
+         }
+      }
+      
+      SetWorldTransform(hdc, &old_xform); 
+   }
 }
 //-----------------------------------------------------------------------------
 void Draw_Level(HDC hdc)
@@ -176,13 +297,22 @@ void Draw_Platform_Alt(HDC hdc, int x, int y, int inner_width)
 void Draw_Frame(HDC hdc)
 {// Draw game frame
 
-   Draw_Level(hdc);
+   //Draw_Level(hdc);
 
-   Draw_Platform(hdc, 100, 185, 21);
-   
-   Draw_Platform_Alt(hdc, 90, 175, 42);
+   //Draw_Platform(hdc, 100, 185, 21);
+   //
+   //Draw_Platform_Alt(hdc, 90, 175, 42);
    //Draw_Platform_Alt(hdc, 60, 185, 12);
    //Draw_Platform_Alt(hdc, 100, 185, 21);
 
+   int i;
+
+   for (i = 0; i < 16; i++)
+   {
+      Rotate_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 
+                                                   100, EBT_Blue, ELT_O, i);
+      Rotate_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 
+                                                   130, EBT_Red, ELT_O, i);
+   }
 }
 //-----------------------------------------------------------------------------
