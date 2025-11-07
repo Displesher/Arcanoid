@@ -97,8 +97,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
-   Init();
-
    RECT window_rect;
    window_rect.left = 0;
    window_rect.top = 0;
@@ -113,6 +111,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    if (!hWnd)
       return FALSE;
+
+   Init_Engine(hWnd);
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
@@ -153,17 +153,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
 
-
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Add any drawing code that uses hdc here...
-            Draw_Frame(hdc);
+            Draw_Frame(hdc, ps.rcPaint);
             EndPaint(hWnd, &ps);
         }
         break;
 
+    case WM_KEYDOWN:
+       //switch (wParam)
+       //{
+       //   case VK_LEFT:
+       //      return On_Key_Down(EKT_Left);
+       //   case VK_RIGHT:
+       //      return On_Key_Down(EKT_Right);
+       //   case VK_SPACE:
+       //      return On_Key_Down(EKT_Space);
+       //}
+       //break;
+
+       if (wParam == 0x41 || wParam == VK_LEFT)
+          return On_Key_Down(EKT_Left);
+       else if (wParam == 0x44 || wParam == VK_RIGHT)
+          return On_Key_Down(EKT_Right);
+       else if (wParam == VK_SPACE)
+          return On_Key_Down(EKT_Space);
+       else
+          break;
 
     case WM_DESTROY:
         PostQuitMessage(0);
