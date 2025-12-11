@@ -7,6 +7,7 @@
 #define MAX_LOADSTRING 100
 
 // Global Variables:
+AsEngine Engine;
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
@@ -100,8 +101,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    RECT window_rect;
    window_rect.left = 0;
    window_rect.top = 0;
-   window_rect.right = 320 * Global_Scale;
-   window_rect.bottom = 200 * Global_Scale;
+   window_rect.right = 320 * Engine.Global_Scale;
+   window_rect.bottom = 200 * Engine.Global_Scale;
 
    AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW, TRUE);
    
@@ -112,7 +113,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    if (!hWnd)
       return FALSE;
 
-   Init_Engine(hWnd);
+   Engine.Init_Engine(hWnd);
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
@@ -158,7 +159,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Add any drawing code that uses hdc here...
-            Draw_Frame(hdc, ps.rcPaint);
+            Engine.Draw_Frame(hdc, ps.rcPaint);
             EndPaint(hWnd, &ps);
         }
         break;
@@ -176,17 +177,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
        //break;
 
        if (wParam == 0x41 || wParam == VK_LEFT)
-          return On_Key_Down(EKT_Left);
+          return Engine.On_Key_Down(EKT_Left);
        else if (wParam == 0x44 || wParam == VK_RIGHT)
-          return On_Key_Down(EKT_Right);
+          return Engine.On_Key_Down(EKT_Right);
        else if (wParam == VK_SPACE)
-          return On_Key_Down(EKT_Space);
+          return Engine.On_Key_Down(EKT_Space);
        else
           break;
 
     case WM_TIMER:
-       if (wParam == Timer_ID)
-          return On_Timer();
+       if (wParam == Engine.Timer_ID)
+          return Engine.On_Timer();
        break;
 
     case WM_DESTROY:
