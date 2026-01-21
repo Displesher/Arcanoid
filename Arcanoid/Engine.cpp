@@ -81,13 +81,13 @@ void ABall::Move(AsEngine *engine, ALevel *level, AsPlatform *platform)
    next_y_pos = Ball_Y_Pos - (int)(Ball_Speed * sin(Ball_Y_Direction));
 
    // Reflection from the horizontal border
-   if (next_x_pos < AsEngine::Border_X_Offset || next_x_pos > max_x_pos)
+   if (next_x_pos < AsBorder::Border_X_Offset || next_x_pos > max_x_pos)
    {
       Ball_X_Direction += M_PI;
       next_x_pos = Ball_X_Pos + (int)(Ball_Speed * cos(Ball_X_Direction));
    }
    // Reflection from the vertical border
-   if (next_y_pos < AsEngine::Border_Y_Offset || next_y_pos > max_y_pos ||
+   if (next_y_pos < AsBorder::Border_Y_Offset || next_y_pos > max_y_pos ||
       // Reflection from the platform
       (next_y_pos > platform_y_pos &&
          next_x_pos >= platform->X_Pos &&
@@ -389,6 +389,75 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area, AsEngine *engine)
 
 
 
+// AsBorder
+//-----------------------------------------------------------------------------
+void AsBorder::Init()
+{
+   AsEngine::Create_Pen_Brush(Border_Blue_Pen, Border_Blue_Brush,
+                                                            45, 140, 180);
+   AsEngine::Create_Pen_Brush(Border_White_Pen, Border_White_Brush,
+                                                            255, 255, 255);
+}
+//-----------------------------------------------------------------------------
+void AsBorder::Draw_Element(HDC hdc, int x, int y, bool top_border,
+                                                         AsEngine *engine)
+{ // Draw level border element
+  // 1. Draw main line
+   SelectObject(hdc, Border_Blue_Pen);
+   SelectObject(hdc, Border_Blue_Brush);
+   if (top_border)
+      Rectangle(hdc,
+         x * AsEngine::Global_Scale, (y + 1) * AsEngine::Global_Scale,
+         (x + 4) * AsEngine::Global_Scale, (y + 4) * AsEngine::Global_Scale);
+   else
+      Rectangle(hdc,
+         (x + 1) * AsEngine::Global_Scale, y * AsEngine::Global_Scale,
+         (x + 4) * AsEngine::Global_Scale, (y + 4) * AsEngine::Global_Scale);
+
+   // 2. Draw border line
+   SelectObject(hdc, Border_White_Pen);
+   SelectObject(hdc, Border_White_Brush);
+   if (top_border)
+      Rectangle(hdc,
+         x * AsEngine::Global_Scale, y * AsEngine::Global_Scale,
+         (x + 4) * AsEngine::Global_Scale, (y + 1) * AsEngine::Global_Scale);
+   else
+      Rectangle(hdc,
+         x * AsEngine::Global_Scale, y * AsEngine::Global_Scale,
+         (x + 1) * AsEngine::Global_Scale, (y + 4) * AsEngine::Global_Scale);
+
+   // 3. Draw perforation
+   SelectObject(hdc, engine->BG_Pen);
+   SelectObject(hdc, engine->BG_Brush);
+   if (top_border)
+      Rectangle(hdc,
+         (x + 2) * AsEngine::Global_Scale, (y + 2) * AsEngine::Global_Scale,
+         (x +3) * AsEngine::Global_Scale, (y + 3) * AsEngine::Global_Scale);
+   else
+      Rectangle(hdc,
+         (x + 2) * AsEngine::Global_Scale, (y + 1) * AsEngine::Global_Scale,
+         (x +3) * AsEngine::Global_Scale, (y + 2) * AsEngine::Global_Scale);
+}
+//-----------------------------------------------------------------------------
+void AsBorder::Draw(HDC hdc, RECT &paint_area, AsEngine *engine)
+{ // Draw level border
+
+   int i;
+
+   // 1. Left line
+   for (i = 0; i < 50; i++)
+      Draw_Element(hdc, 2, 1 + i * 4, false, engine);
+   // 2. Right line
+   for (i = 0; i < 50; i++)
+      Draw_Element(hdc, 201, 1 + i * 4, false, engine);
+   // 3. Top line
+   for (i = 0; i < 50; i++)
+      Draw_Element(hdc, 3 + i * 4, 0, true, engine);
+}
+//-----------------------------------------------------------------------------
+
+
+
 // AsEngine
 //-----------------------------------------------------------------------------
 AsEngine::AsEngine()
@@ -401,12 +470,10 @@ void AsEngine::Init_Engine(HWND hwnd)
 
    Create_Pen_Brush(BG_Pen, BG_Brush, 15, 63, 31);
 
-   Create_Pen_Brush(Border_Blue_Pen, Border_Blue_Brush, 45, 140, 180);
-   Create_Pen_Brush(Border_White_Pen, Border_White_Brush, 255, 255, 255);
-
    Level.Init();
    Ball.Init();
    Platform.Init();
+   Border.Init();
 
    Platform.Redraw(this);
    Ball.Redraw(this);
@@ -432,7 +499,7 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
 
    Ball.Draw(hdc, paint_area, this);
 
-   Draw_Bounds(hdc, paint_area);
+   Border.Draw(hdc, paint_area, this);
 }
 //-----------------------------------------------------------------------------
 int AsEngine::On_Key_Down(EKey_Type key_type)
@@ -441,8 +508,8 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
    {
    case EKT_Left:
       Platform.X_Pos -= Platform.X_Step;
-      if (Platform.X_Pos < Border_X_Offset)
-         Platform.X_Pos = Border_X_Offset;
+      if (Platform.X_Pos < AsBorder::Border_X_Offset)
+         Platform.X_Pos = AsBorder::Border_X_Offset;
       Platform.Redraw(this);
       break;
 
@@ -473,54 +540,5 @@ void AsEngine::Create_Pen_Brush(HPEN &pen, HBRUSH &brush,
 {
    pen = CreatePen(PS_SOLID, 0, RGB(r, g, b));
    brush = CreateSolidBrush(RGB(r, g, b));
-}
-//-----------------------------------------------------------------------------
-void AsEngine::Draw_Border(HDC hdc, int x, int y, bool top_border)
-{ // Draw level border element
-   // 1. Draw main line
-   SelectObject(hdc, Border_Blue_Pen);
-   SelectObject(hdc, Border_Blue_Brush);
-   if (top_border)
-      Rectangle(hdc, x * Global_Scale, (y + 1) * Global_Scale,
-                    (x + 4) * Global_Scale, (y + 4) * Global_Scale);
-   else
-      Rectangle(hdc, (x + 1) * Global_Scale, y * Global_Scale,
-                     (x + 4) * Global_Scale, (y + 4) * Global_Scale);
-
-   // 2. Draw border line
-   SelectObject(hdc, Border_White_Pen);
-   SelectObject(hdc, Border_White_Brush);
-   if (top_border)
-      Rectangle(hdc, x * Global_Scale, y * Global_Scale,
-                    (x + 4) * Global_Scale, (y + 1) * Global_Scale);
-   else
-      Rectangle(hdc, x * Global_Scale, y * Global_Scale,
-                    (x + 1) * Global_Scale, (y + 4) * Global_Scale);
-
-   // 3. Draw perforation
-   SelectObject(hdc, BG_Pen);
-   SelectObject(hdc, BG_Brush);
-   if (top_border)
-      Rectangle(hdc, (x + 2) * Global_Scale, (y + 2) * Global_Scale,
-                     (x +3) * Global_Scale, (y + 3) * Global_Scale);
-   else
-      Rectangle(hdc, (x + 2) * Global_Scale, (y + 1) * Global_Scale,
-                     (x +3) * Global_Scale, (y + 2) * Global_Scale);
-}
-//-----------------------------------------------------------------------------
-void AsEngine::Draw_Bounds(HDC hdc, RECT &paint_area)
-{ // Draw level border
-
-   int i;
-
-   // 1. Left line
-   for (i = 0; i < 50; i++)
-      Draw_Border(hdc, 2, 1 + i * 4, false);
-   // 2. Right line
-   for (i = 0; i < 50; i++)
-      Draw_Border(hdc, 201, 1 + i * 4, false);
-   // 3. Top line
-   for (i = 0; i < 50; i++)
-      Draw_Border(hdc, 3 + i * 4, 0, true);
 }
 //-----------------------------------------------------------------------------

@@ -111,6 +111,21 @@ private:
    static const int Height = Circle_Diameter;
 };
 //-----------------------------------------------------------------------------
+class AsBorder
+{
+public:
+   void Init();
+   void Draw(HDC hdc, RECT &paint_area, AsEngine *engine);
+
+   static const int Border_X_Offset = 6, Border_Y_Offset = 4;
+
+private:
+   void Draw_Element(HDC hdc, int x, int y, bool top_border, AsEngine *engine);
+
+   HPEN Border_Blue_Pen, Border_White_Pen;
+   HBRUSH Border_Blue_Brush, Border_White_Brush;
+};
+//-----------------------------------------------------------------------------
 class AsEngine
 {
 public:
@@ -135,17 +150,11 @@ public:
    static const int Max_X_Pos = ALevel::Level_X_Offset +
                                  ALevel::Cell_Width * ALevel::Level_Width;
    static const int Max_Y_Pos = 199 - ABall::Ball_Size; // 199
-   static const int Border_X_Offset = 6, Border_Y_Offset = 4;
 
 private:
-   void Draw_Border(HDC hdc, int x, int y, bool top_border);
-   void Draw_Bounds(HDC hdc, RECT &paint_area);
-
-   HPEN Border_Blue_Pen, Border_White_Pen;
-   HBRUSH Border_Blue_Brush, Border_White_Brush;
-
    ABall Ball;
    ALevel Level;
    AsPlatform Platform;
+   AsBorder Border;
 };
 //-----------------------------------------------------------------------------
