@@ -21,15 +21,16 @@ char Level_01[ALevel::Level_Height][ALevel::Level_Width] =
 // ABall
 //-----------------------------------------------------------------------------
 ABall::ABall()
-   : Ball_X_Pos(20), Ball_Y_Pos(170),
-     Ball_Speed(3.0),
-     Ball_X_Direction(M_PI_4 / 2), Ball_Y_Direction(M_PI_4 / 2)
+   : Ball_Pen(0), Ball_Brush(0),
+     Ball_X_Pos(20), Ball_Y_Pos(170), Ball_Speed(3.0),
+     Ball_X_Direction(M_PI_4 / 2), Ball_Y_Direction(M_PI_4 / 2),
+     Ball_Rect{}, Prev_Ball_Rect{}
 {
 }
 //-----------------------------------------------------------------------------
 void ABall::Init()
 {
-   AsEngine::Create_Pen_Brush(Ball_Pen, Ball_Brush, 255, 255, 255);
+   AsConfig::Create_Pen_Brush(Ball_Pen, Ball_Brush, 255, 255, 255);
 }
 //-----------------------------------------------------------------------------
 void ABall::Redraw(AsEngine *engine)
@@ -110,13 +111,20 @@ void ABall::Move(AsEngine *engine, ALevel *level, AsPlatform *platform)
 
 
 // ALevel
+// //-----------------------------------------------------------------------------
+ALevel::ALevel()
+   : Brick_Red_Pen(0), Brick_Blue_Pen(0), Letter_Pen(0),
+     Brick_Red_Brush(0), Brick_Blue_Brush(0),
+     Level_Rect{}
+{
+}
 //-----------------------------------------------------------------------------
 void ALevel::Init()
 {
    Letter_Pen = CreatePen(PS_SOLID, 3, RGB(255, 245, 230));
 
-   AsEngine::Create_Pen_Brush(Brick_Red_Pen, Brick_Red_Brush, 185, 45, 50);
-   AsEngine::Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, 45, 140, 180);
+   AsConfig::Create_Pen_Brush(Brick_Red_Pen, Brick_Red_Brush, 185, 45, 50);
+   AsConfig::Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, 45, 140, 180);
 
    Level_Rect.left = ALevel::Level_X_Offset * AsEngine::Global_Scale;
    Level_Rect.top = ALevel::Level_Y_Offset * AsEngine::Global_Scale;
@@ -165,7 +173,6 @@ void ALevel::Check_Level_Brick_Hit(int &next_y_pos, ABall *ball)
 //-----------------------------------------------------------------------------
 void ALevel::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
 {
-
    HPEN pen;
    HBRUSH brush;
 
@@ -227,7 +234,6 @@ void ALevel::Rotate_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type,
    HPEN front_pen, back_pen;
    HBRUSH front_brush, back_brush;
    XFORM xform, old_xform;
-
 
    if (!(brick_type == EBT_Blue || brick_type == EBT_Red))
       return; // falling letter may be only from such of these bricks
@@ -317,16 +323,19 @@ void ALevel::Rotate_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type,
 //-----------------------------------------------------------------------------
 AsPlatform::AsPlatform()
    : Inner_Width(21), X_Pos(AsEngine::Max_X_Pos / 2),
-   X_Step(AsEngine::Global_Scale * 2),
-   Width(21 + Circle_Diameter)
+     X_Step(AsEngine::Global_Scale * 2),
+     Width(21 + Circle_Diameter),
+     Platform_Circle_Pen(0), Platform_Inner_Pen(0), Highlight_Pen(0),
+     Platform_Circle_Brush(0), Platform_Inner_Brush(0),
+     Platform_Rect{}, Prev_Platform_Rect{}
 {
 }
 //-----------------------------------------------------------------------------
 void AsPlatform::Init()
 {
-   AsEngine::Create_Pen_Brush(Platform_Circle_Pen, Platform_Circle_Brush,
+   AsConfig::Create_Pen_Brush(Platform_Circle_Pen, Platform_Circle_Brush,
                                                                170, 120, 80);
-   AsEngine::Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush,
+   AsConfig::Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush,
                                                                200, 190, 170);
    Highlight_Pen = CreatePen(PS_SOLID, 0, RGB(255, 245, 230));
 }
@@ -389,78 +398,10 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area, AsEngine *engine)
 
 
 
-// AsBorder
-//-----------------------------------------------------------------------------
-void AsBorder::Init()
-{
-   AsEngine::Create_Pen_Brush(Border_Blue_Pen, Border_Blue_Brush,
-                                                            45, 140, 180);
-   AsEngine::Create_Pen_Brush(Border_White_Pen, Border_White_Brush,
-                                                            255, 255, 255);
-}
-//-----------------------------------------------------------------------------
-void AsBorder::Draw_Element(HDC hdc, int x, int y, bool top_border,
-                                                         AsEngine *engine)
-{ // Draw level border element
-  // 1. Draw main line
-   SelectObject(hdc, Border_Blue_Pen);
-   SelectObject(hdc, Border_Blue_Brush);
-   if (top_border)
-      Rectangle(hdc,
-         x * AsEngine::Global_Scale, (y + 1) * AsEngine::Global_Scale,
-         (x + 4) * AsEngine::Global_Scale, (y + 4) * AsEngine::Global_Scale);
-   else
-      Rectangle(hdc,
-         (x + 1) * AsEngine::Global_Scale, y * AsEngine::Global_Scale,
-         (x + 4) * AsEngine::Global_Scale, (y + 4) * AsEngine::Global_Scale);
-
-   // 2. Draw border line
-   SelectObject(hdc, Border_White_Pen);
-   SelectObject(hdc, Border_White_Brush);
-   if (top_border)
-      Rectangle(hdc,
-         x * AsEngine::Global_Scale, y * AsEngine::Global_Scale,
-         (x + 4) * AsEngine::Global_Scale, (y + 1) * AsEngine::Global_Scale);
-   else
-      Rectangle(hdc,
-         x * AsEngine::Global_Scale, y * AsEngine::Global_Scale,
-         (x + 1) * AsEngine::Global_Scale, (y + 4) * AsEngine::Global_Scale);
-
-   // 3. Draw perforation
-   SelectObject(hdc, engine->BG_Pen);
-   SelectObject(hdc, engine->BG_Brush);
-   if (top_border)
-      Rectangle(hdc,
-         (x + 2) * AsEngine::Global_Scale, (y + 2) * AsEngine::Global_Scale,
-         (x +3) * AsEngine::Global_Scale, (y + 3) * AsEngine::Global_Scale);
-   else
-      Rectangle(hdc,
-         (x + 2) * AsEngine::Global_Scale, (y + 1) * AsEngine::Global_Scale,
-         (x +3) * AsEngine::Global_Scale, (y + 2) * AsEngine::Global_Scale);
-}
-//-----------------------------------------------------------------------------
-void AsBorder::Draw(HDC hdc, RECT &paint_area, AsEngine *engine)
-{ // Draw level border
-
-   int i;
-
-   // 1. Left line
-   for (i = 0; i < 50; i++)
-      Draw_Element(hdc, 2, 1 + i * 4, false, engine);
-   // 2. Right line
-   for (i = 0; i < 50; i++)
-      Draw_Element(hdc, 201, 1 + i * 4, false, engine);
-   // 3. Top line
-   for (i = 0; i < 50; i++)
-      Draw_Element(hdc, 3 + i * 4, 0, true, engine);
-}
-//-----------------------------------------------------------------------------
-
-
-
 // AsEngine
 //-----------------------------------------------------------------------------
 AsEngine::AsEngine()
+   : Hwnd(0), BG_Pen(0), BG_Brush(0)
 {
 }
 //-----------------------------------------------------------------------------
@@ -468,7 +409,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 {// Setting up the game before start
    Hwnd = hwnd;
 
-   Create_Pen_Brush(BG_Pen, BG_Brush, 15, 63, 31);
+   AsConfig::Create_Pen_Brush(BG_Pen, BG_Brush, 15, 63, 31);
 
    Level.Init();
    Ball.Init();
@@ -499,7 +440,7 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
 
    Ball.Draw(hdc, paint_area, this);
 
-   Border.Draw(hdc, paint_area, this);
+   Border.Draw(hdc, paint_area, BG_Pen, BG_Brush);
 }
 //-----------------------------------------------------------------------------
 int AsEngine::On_Key_Down(EKey_Type key_type)
@@ -533,12 +474,5 @@ int AsEngine::On_Timer()
    Ball.Move(this, &Level, &Platform);
 
    return 0;
-}
-//-----------------------------------------------------------------------------
-void AsEngine::Create_Pen_Brush(HPEN &pen, HBRUSH &brush,
-   unsigned char r, unsigned char g, unsigned char b)
-{
-   pen = CreatePen(PS_SOLID, 0, RGB(r, g, b));
-   brush = CreateSolidBrush(RGB(r, g, b));
 }
 //-----------------------------------------------------------------------------

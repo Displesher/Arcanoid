@@ -5,6 +5,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include "Border.h"
+
 class AsEngine;
 class ALevel;
 class AsPlatform;
@@ -57,6 +59,8 @@ private:
 class ALevel
 {
 public:
+   ALevel();
+
    void Init();
    void Draw_Level(HDC hdc, RECT &paint_area);
    void Check_Level_Brick_Hit(int &next_y_pos, ABall *ball);
@@ -111,21 +115,6 @@ private:
    static const int Height = Circle_Diameter;
 };
 //-----------------------------------------------------------------------------
-class AsBorder
-{
-public:
-   void Init();
-   void Draw(HDC hdc, RECT &paint_area, AsEngine *engine);
-
-   static const int Border_X_Offset = 6, Border_Y_Offset = 4;
-
-private:
-   void Draw_Element(HDC hdc, int x, int y, bool top_border, AsEngine *engine);
-
-   HPEN Border_Blue_Pen, Border_White_Pen;
-   HBRUSH Border_Blue_Brush, Border_White_Brush;
-};
-//-----------------------------------------------------------------------------
 class AsEngine
 {
 public:
@@ -135,9 +124,6 @@ public:
    void Draw_Frame(HDC hdc, RECT &paint_area);
    int On_Key_Down(EKey_Type key_type);
    int On_Timer();
-
-   static void Create_Pen_Brush(HPEN &pen, HBRUSH &brush,
-      unsigned char r, unsigned char g, unsigned char b);
 
    HWND Hwnd;
 
