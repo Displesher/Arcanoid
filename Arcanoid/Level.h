@@ -1,11 +1,6 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 #include "Config.h"
-
-class ABall;
 
 //-----------------------------------------------------------------------------
 enum EBrick_Type
@@ -28,14 +23,8 @@ public:
 
    void Init();
    void Draw_Level(HDC hdc, RECT &paint_area);
-   void Check_Level_Brick_Hit(int &next_y_pos, ABall *ball);
-
-   static const int Level_Width = 12; // Width a level in cells
-   static const int Level_Height = 14; // Height a level in cells
-   static const int Level_X_Offset = 8;
-   static const int Level_Y_Offset = 6;
-   static const int Cell_Width = 16;
-   static const int Cell_Height = 8;
+   void Check_Level_Brick_Hit(int &next_y_pos, double &ball_y_direction,
+                                                          double ball_speed);
 
 private:
    void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type);

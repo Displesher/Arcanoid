@@ -28,6 +28,9 @@
     <Filter Include="Level">
       <UniqueIdentifier>{c4a38894-8227-49d6-a775-e514926148c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Ball">
+      <UniqueIdentifier>{6322cac7-ab0b-4bbc-bd62-9c06789e856f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -53,6 +56,9 @@
     </ClInclude>
     <ClInclude Include="Level.h">
       <Filter>Level</Filter>
+    </ClInclude>
+    <ClInclude Include="Ball.h">
+      <Filter>Ball</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -83,6 +89,9 @@
     </ClCompile>
     <ClCompile Include="Level.cpp">
       <Filter>Level</Filter>
+    </ClCompile>
+    <ClCompile Include="Ball.cpp">
+      <Filter>Ball</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
