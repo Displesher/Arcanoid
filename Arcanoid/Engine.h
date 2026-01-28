@@ -26,14 +26,14 @@ public:
    int On_Key_Down(EKey_Type key_type);
    int On_Timer();
 
+   static const int Timer_ID = WM_USER + 1;
+
+private:
    HWND Hwnd;
 
    HPEN BG_Pen;
    HBRUSH BG_Brush;
 
-   static const int Timer_ID = WM_USER + 1;
-
-private:
    ABall Ball;
    ALevel Level;
    AsPlatform Platform;

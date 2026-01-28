@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Config.h"
+#include "Active_Brick.h"
 
 //-----------------------------------------------------------------------------
 enum EBrick_Type
@@ -22,9 +23,11 @@ public:
    ALevel();
 
    void Init();
-   void Draw_Level(HDC hdc, RECT &paint_area);
+   void Draw(HDC hdc, RECT &paint_area);
    void Check_Level_Brick_Hit(int &next_y_pos, double &ball_y_direction,
                                                           double ball_speed);
+
+   AActive_Brick Active_Brick;
 
 private:
    void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type);
@@ -38,7 +41,6 @@ private:
    HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
    RECT Level_Rect;
 
-   static const int Brick_Width = 15;
-   static const int Brick_Height = 7;
+   static char Level_01[AsConfig::Level_Height][AsConfig::Level_Width];
 };
 //-----------------------------------------------------------------------------

@@ -21,13 +21,13 @@ void AsEngine::Init_Engine(HWND hwnd)
    Platform.Redraw(hwnd);
    Ball.Redraw(hwnd);
 
-   SetTimer(hwnd, Timer_ID , 25, nullptr);
+   SetTimer(hwnd, Timer_ID , 1000 / AsConfig::FPS, nullptr);
 }
 //-----------------------------------------------------------------------------
 void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
 {// Draw game frame
 
-   Level.Draw_Level(hdc, paint_area);
+   Level.Draw(hdc, paint_area);
 
    Platform.Draw(hdc, paint_area, BG_Pen, BG_Brush);
 
@@ -74,6 +74,7 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
 int AsEngine::On_Timer()
 {
    Ball.Move(Hwnd, &Level, Platform.X_Pos, Platform.Width);
+   Level.Active_Brick.Fade_Out(Hwnd);
 
    return 0;
 }

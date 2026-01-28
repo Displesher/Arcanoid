@@ -34,6 +34,9 @@
     <Filter Include="Platform">
       <UniqueIdentifier>{cbfaf488-3ac6-48f0-acab-71110e98e6f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Active_Brick">
+      <UniqueIdentifier>{eac33c8b-8ff3-4748-9a7d-f1150d52aee2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -65,6 +68,9 @@
     </ClInclude>
     <ClInclude Include="Platform.h">
       <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Active_Brick.h">
+      <Filter>Active_Brick</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +107,9 @@
     </ClCompile>
     <ClCompile Include="Platform.cpp">
       <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="Active_Brick.cpp">
+      <Filter>Active_Brick</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

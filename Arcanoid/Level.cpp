@@ -1,8 +1,6 @@
 #include "Level.h"
 
-#include "Engine.h"
-
-char Level_01[AsConfig::Level_Height][AsConfig::Level_Width] =
+char ALevel::Level_01[AsConfig::Level_Height][AsConfig::Level_Width] =
 {
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -21,7 +19,7 @@ char Level_01[AsConfig::Level_Height][AsConfig::Level_Width] =
 };
 
 // ALevel
-//--------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 ALevel::ALevel()
    : Brick_Red_Pen(0), Brick_Blue_Pen(0), Letter_Pen(0),
    Brick_Red_Brush(0), Brick_Blue_Brush(0),
@@ -44,7 +42,7 @@ void ALevel::Init()
       AsConfig::Level_Height * AsConfig::Global_Scale;
 }
 //-----------------------------------------------------------------------------
-void ALevel::Draw_Level(HDC hdc, RECT &paint_area)
+void ALevel::Draw(HDC hdc, RECT &paint_area)
 {// Draw level's bricks
    int i, j;
    RECT intersection_rect;
@@ -57,6 +55,8 @@ void ALevel::Draw_Level(HDC hdc, RECT &paint_area)
          Draw_Brick(hdc, AsConfig::Level_X_Offset + j * AsConfig::Cell_Width,
                          AsConfig::Level_Y_Offset + i * AsConfig::Cell_Height,
                                                  (EBrick_Type)Level_01[i][j]);
+
+   Active_Brick.Draw(hdc);
 }
 //-----------------------------------------------------------------------------
 void ALevel::Check_Level_Brick_Hit(int &next_y_pos, double &ball_y_direction,
@@ -107,8 +107,8 @@ void ALevel::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
 
    RoundRect(
       hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale,
-      (x + Brick_Width) * AsConfig::Global_Scale,
-      (y + Brick_Height) * AsConfig::Global_Scale,
+      (x + AsConfig::Brick_Width) * AsConfig::Global_Scale,
+      (y + AsConfig::Brick_Height) * AsConfig::Global_Scale,
       2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
 }
 //-----------------------------------------------------------------------------
@@ -139,7 +139,7 @@ void ALevel::Rotate_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type,
    double rotation_angle;
    double offset;
    // Converting a step to a rotation angle
-   int brick_half_height = ALevel::Brick_Height * AsConfig::Global_Scale / 2;
+   int brick_half_height = AsConfig::Brick_Height * AsConfig::Global_Scale / 2;
    // int brick_half_height = Brick_Height / 2 * Global_Scale;
    int back_part_offset;
    HPEN front_pen, back_pen;
@@ -170,7 +170,7 @@ void ALevel::Rotate_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type,
       SelectObject(hdc, back_brush);
 
       Rectangle(hdc, x, y + brick_half_height - AsConfig::Global_Scale,
-         x + ALevel::Brick_Width * AsConfig::Global_Scale,
+         x + AsConfig::Brick_Width * AsConfig::Global_Scale,
          y + brick_half_height);
 
       // Draw foreground
@@ -178,7 +178,7 @@ void ALevel::Rotate_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type,
       SelectObject(hdc, front_brush);
 
       Rectangle(hdc, x, y + brick_half_height,
-         x + ALevel::Brick_Width * AsConfig::Global_Scale,
+         x + AsConfig::Brick_Width * AsConfig::Global_Scale,
          y + brick_half_height + AsConfig::Global_Scale - 1);
    }
    else
@@ -201,7 +201,7 @@ void ALevel::Rotate_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type,
       offset = 3.0 * (1.0 - fabs(xform.eM22)) * (double)AsConfig::Global_Scale;
       back_part_offset = (int)round(offset);
       Rectangle(hdc, 0, -brick_half_height - back_part_offset,
-         ALevel::Brick_Width * AsConfig::Global_Scale,
+         AsConfig::Brick_Width * AsConfig::Global_Scale,
          brick_half_height - back_part_offset);
 
       // Draw foreground
@@ -209,7 +209,7 @@ void ALevel::Rotate_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type,
       SelectObject(hdc, front_brush);
 
       Rectangle(hdc, 0, -brick_half_height,
-         ALevel::Brick_Width * AsConfig::Global_Scale, brick_half_height);
+         AsConfig::Brick_Width * AsConfig::Global_Scale, brick_half_height);
 
       if (rotation_step > 4 && rotation_step <= 12)
       {
