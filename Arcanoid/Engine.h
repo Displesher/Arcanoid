@@ -31,9 +31,6 @@ public:
 private:
    HWND Hwnd;
 
-   HPEN BG_Pen;
-   HBRUSH BG_Brush;
-
    ABall Ball;
    ALevel Level;
    AsPlatform Platform;

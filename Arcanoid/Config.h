@@ -5,11 +5,27 @@
 #include <Windows.h>
 
 //-----------------------------------------------------------------------------
+class AColor
+{
+public:
+   AColor(unsigned char r, unsigned char g, unsigned char b);
+
+   unsigned char R, G, B;
+};
+//-----------------------------------------------------------------------------
 class AsConfig
 {
 public:
+   static void Setup_Colors();
+   static void Create_Pen_Brush(HPEN &pen, HBRUSH &brush, const AColor &color);
    static void Create_Pen_Brush(HPEN &pen, HBRUSH &brush,
       unsigned char r, unsigned char g, unsigned char b);
+
+   static const AColor BG_Color;
+   static const AColor Red_Brick_Color, Blue_Brick_Color, Brick_Border_Color;
+
+   static HPEN BG_Pen;
+   static HBRUSH BG_Brush;
 
    static const int Global_Scale = 3;
    static const int Ball_Size = 4;

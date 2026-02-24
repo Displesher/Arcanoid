@@ -35,15 +35,15 @@ void AsPlatform::Redraw(HWND hwnd)
    InvalidateRect(hwnd, &Platform_Rect, FALSE);
 }
 //-----------------------------------------------------------------------------
-void AsPlatform::Draw(HDC hdc, RECT &paint_area, HPEN bg_pen, HBRUSH bg_brush)
+void AsPlatform::Draw(HDC hdc, RECT &paint_area)
 {
    int x = X_Pos, y = AsConfig::Platform_Y_Pos;
    RECT intersection_rect;
    if (! IntersectRect(&intersection_rect, &paint_area, &Platform_Rect))
       return;
    // Redraw previous platform position with GB color
-   SelectObject(hdc, bg_pen);
-   SelectObject(hdc, bg_brush);
+   SelectObject(hdc, AsConfig::BG_Pen);
+   SelectObject(hdc, AsConfig::BG_Brush);
    Rectangle(hdc, Prev_Platform_Rect.left, Prev_Platform_Rect.top,
       Prev_Platform_Rect.right, Prev_Platform_Rect.bottom);
 

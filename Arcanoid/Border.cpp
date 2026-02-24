@@ -16,24 +16,23 @@ void AsBorder::Init()
       255, 255, 255);
 }
 //-----------------------------------------------------------------------------
-void AsBorder::Draw(HDC hdc, RECT &paint_area, HPEN bg_pen, HBRUSH bg_brush)
+void AsBorder::Draw(HDC hdc, RECT &paint_area)
 { // Draw level border
 
    int i;
 
    // 1. Left line
    for (i = 0; i < 50; i++)
-      Draw_Element(hdc, 2, 1 + i * 4, false, bg_pen, bg_brush);
+      Draw_Element(hdc, 2, 1 + i * 4, false);
    // 2. Right line
    for (i = 0; i < 50; i++)
-      Draw_Element(hdc, 201, 1 + i * 4, false, bg_pen, bg_brush);
+      Draw_Element(hdc, 201, 1 + i * 4, false);
    // 3. Top line
    for (i = 0; i < 50; i++)
-      Draw_Element(hdc, 3 + i * 4, 0, true, bg_pen, bg_brush);
+      Draw_Element(hdc, 3 + i * 4, 0, true);
 }
 //-----------------------------------------------------------------------------
-void AsBorder::Draw_Element(HDC hdc, int x, int y, bool top_border,
-                                          HPEN bg_pen, HBRUSH bg_brush)
+void AsBorder::Draw_Element(HDC hdc, int x, int y, bool top_border)
 { // Draw level border element
   // 1. Draw main line
    SelectObject(hdc, Border_Blue_Pen);
@@ -60,8 +59,8 @@ void AsBorder::Draw_Element(HDC hdc, int x, int y, bool top_border,
          (x + 1) * AsConfig::Global_Scale, (y + 4) * AsConfig::Global_Scale);
 
    // 3. Draw perforation
-   SelectObject(hdc, bg_pen);
-   SelectObject(hdc, bg_brush);
+   SelectObject(hdc, AsConfig::BG_Pen);
+   SelectObject(hdc, AsConfig::BG_Brush);
    if (top_border)
       Rectangle(hdc,
          (x + 2) * AsConfig::Global_Scale, (y + 2) * AsConfig::Global_Scale,

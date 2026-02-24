@@ -30,15 +30,15 @@ void ABall::Redraw(HWND hwnd)
    InvalidateRect(hwnd, &Ball_Rect, FALSE);
 }
 //-----------------------------------------------------------------------------
-void ABall::Draw(HDC hdc, RECT &paint_area, HPEN bg_pen, HBRUSH bg_brush)
+void ABall::Draw(HDC hdc, RECT &paint_area)
 {
    RECT intersection_rect;
    if (! IntersectRect(&intersection_rect, &paint_area, &Ball_Rect))
       return;
 
    // 1. Redraw previous ball position with GB color
-   SelectObject(hdc, bg_pen);
-   SelectObject(hdc, bg_brush);
+   SelectObject(hdc, AsConfig::BG_Pen);
+   SelectObject(hdc, AsConfig::BG_Brush);
    Rectangle(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top,
       Prev_Ball_Rect.right, Prev_Ball_Rect.bottom);
 

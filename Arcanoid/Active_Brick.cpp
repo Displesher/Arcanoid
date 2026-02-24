@@ -1,20 +1,25 @@
 #include "Active_Brick.h"
 
 // AActive_Brick
+
+HPEN AActive_Brick::Fadindg_Red_Brick_Pens[Max_Fade_Step];
+HBRUSH AActive_Brick::Fadindg_Red_Brick_Brushes[Max_Fade_Step];
+
+HPEN AActive_Brick::Fadindg_Blue_Brick_Pens[Max_Fade_Step];
+HBRUSH AActive_Brick::Fadindg_Blue_Brick_Brushes[Max_Fade_Step];
 //-----------------------------------------------------------------------------
-AActive_Brick::AActive_Brick()
-   : Fade_Step(0), Brick_Rect{}
+AActive_Brick::AActive_Brick(EBrick_Type brick_type)
+   : Brick_Type(brick_type), Fade_Step(0), Brick_Rect{}
 {
 }
 //-----------------------------------------------------------------------------
 void AActive_Brick::Fade_Out(HWND hwnd)
 {
-   //if (Fade_Step > Max_Fade_Step)
-   //   return;
-   //++Fade_Step;
-   //Redraw_Brick(hwnd);
+   //// infinitely fading for debug
+   //if (Fade_Step >= Max_Fade_Step - 1)
+   //   Fade_Step = 0;
 
-   if (Fade_Step < Max_Fade_Step)
+   if (Fade_Step < Max_Fade_Step - 1)
       ++Fade_Step;
    else
       return;
@@ -25,44 +30,25 @@ void AActive_Brick::Fade_Out(HWND hwnd)
 void AActive_Brick::Draw(HDC hdc)
 {// Draw a fading brick
 
-   HPEN fade_brick_pen;
-   HBRUSH fade_brick_brush;
+   HPEN pen = 0;
+   HBRUSH brush = 0;
 
-   // blue_brick_R = 45, blue_brick_G = 140, blue_brick_B = 180;
-   // red_brick_R = 185, red_brick_G = 45, red_brick_B = 50;
-
-   // bg_r = 15, bg_g = 63, bg_b = 31;
-
-   //int fade_brick_R = (45 - ((45 - 15) / Fade_Step));
-   //int fade_brick_G = (140 - ((140 - 45) / Fade_Step));
-   //int fade_brick_B = (180 - ((180 - 31) / Fade_Step));
-
-   int fade_pen_R = (0 +  Fade_Step * ((0 + 15) / Max_Fade_Step));
-   int fade_pen_G = (0 + Fade_Step * ((0 + 63) / Max_Fade_Step));
-   int fade_pen_B = (0 + Fade_Step * ((0 + 31) / Max_Fade_Step));
-
-   int fade_brush_R = (45 -  Fade_Step * ((45 - 15) / Max_Fade_Step));
-   int fade_brush_G = (140 - Fade_Step * ((140 - 63) / Max_Fade_Step));
-   int fade_brush_B = (180 - Fade_Step * ((180 - 31) / Max_Fade_Step));
-
-   if (Fade_Step == Max_Fade_Step)
+   switch (Brick_Type)
    {
-      fade_pen_R = 15;
-      fade_pen_G = 63;
-      fade_pen_B = 31;
-
-      fade_brush_R = 15;
-      fade_brush_G = 63;
-      fade_brush_B = 31;
+   case EBT_Red:
+      pen = Fadindg_Red_Brick_Pens[Fade_Step];
+      brush = Fadindg_Red_Brick_Brushes[Fade_Step];
+      break;
+   case EBT_Blue:
+      pen = Fadindg_Blue_Brick_Pens[Fade_Step];
+      brush = Fadindg_Blue_Brick_Brushes[Fade_Step];
+      break;
    }
 
-   fade_brick_pen =
-      CreatePen(PS_SOLID, 1, RGB(fade_pen_R, fade_pen_G, fade_pen_B));
-   fade_brick_brush =
-      CreateSolidBrush(RGB(fade_brush_R, fade_brush_G, fade_brush_B));
-
-   SelectObject(hdc, fade_brick_pen);
-   SelectObject(hdc, fade_brick_brush);
+   if (pen)
+      SelectObject(hdc, pen);
+   if (brush)
+      SelectObject(hdc, brush);
 
    Brick_Rect.left = (AsConfig::Level_X_Offset + 1 * AsConfig::Cell_Width)
       * AsConfig::Global_Scale;
@@ -78,5 +64,42 @@ void AActive_Brick::Draw(HDC hdc)
    RoundRect(hdc,
       Brick_Rect.left, Brick_Rect.top, Brick_Rect.right, Brick_Rect.bottom,
       2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
+}
+//-----------------------------------------------------------------------------
+void AActive_Brick::Setup_Colors()
+{
+   COLORREF color;
+   int i;
+
+   for (i = 0; i < Max_Fade_Step; i++)
+   {
+      color = Get_Fading_Color(AsConfig::Brick_Border_Color, i);
+      Fadindg_Red_Brick_Pens[i] = CreatePen(PS_SOLID, 1, color);
+      Fadindg_Blue_Brick_Pens[i] = CreatePen(PS_SOLID, 1, color);
+
+      color = Get_Fading_Color(AsConfig::Red_Brick_Color, i);
+      Fadindg_Red_Brick_Brushes[i] = CreateSolidBrush(color);
+
+      color = Get_Fading_Color(AsConfig::Blue_Brick_Color, i);
+      Fadindg_Blue_Brick_Brushes[i] = CreateSolidBrush(color);
+   }
+}
+//-----------------------------------------------------------------------------
+unsigned char AActive_Brick::Get_Fading_Channel(unsigned char channel,
+   unsigned char bg_channel,
+   int step)
+{
+   return (channel -  step * (channel - bg_channel) / (Max_Fade_Step - 1));
+}
+//-----------------------------------------------------------------------------
+COLORREF AActive_Brick::Get_Fading_Color(const AColor &color, int step)
+{
+   unsigned char r, g, b;
+
+   r = Get_Fading_Channel(color.R, AsConfig::BG_Color.R, step);
+   g = Get_Fading_Channel(color.G, AsConfig::BG_Color.G, step);
+   b = Get_Fading_Channel(color.B, AsConfig::BG_Color.B, step);
+
+   return RGB(r, g, b);
 }
 //-----------------------------------------------------------------------------

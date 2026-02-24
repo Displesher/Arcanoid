@@ -28,6 +28,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
    UNREFERENCED_PARAMETER(lpCmdLine);
 
    // TODO: Place code here.
+   AsConfig::Setup_Colors();
 
    // Initialize global strings
    LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -75,7 +76,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
    wcex.hInstance = hInstance;
    wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ARCANOID));
    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-   wcex.hbrBackground = CreateSolidBrush(RGB(15, 63, 31));
+   wcex.hbrBackground = AsConfig::BG_Brush;
    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_ARCANOID);
    wcex.lpszClassName = szWindowClass;
    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
