@@ -20,7 +20,9 @@ public:
    static void Create_Pen_Brush(HPEN &pen, HBRUSH &brush, const AColor &color);
    static void Create_Pen_Brush(HPEN &pen, HBRUSH &brush,
       unsigned char r, unsigned char g, unsigned char b);
+   static int Rand(int range);
 
+   static int Curent_Timer_Tick;
    static const AColor BG_Color;
    static const AColor Red_Brick_Color, Blue_Brick_Color, Brick_Border_Color;
 
@@ -40,7 +42,7 @@ public:
    static const int Border_X_Offset = 6;
    static const int Border_Y_Offset = 4;
    static const int Max_X_Pos = Level_X_Offset + Cell_Width * Level_Width;
-   static const int Max_Y_Pos = 199 - Ball_Size; // 199
+   static const int Max_Y_Pos = 199;
    static const int Platform_Y_Pos = 185;
    static const int FPS = 40;
 };
