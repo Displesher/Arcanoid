@@ -28,6 +28,7 @@ public:
 
    static HPEN BG_Pen;
    static HBRUSH BG_Brush;
+   static HWND Hwnd;
 
    static const int Global_Scale = 3;
    static const int Ball_Size = 4;

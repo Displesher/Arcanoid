@@ -29,8 +29,6 @@ public:
    static const int Timer_ID = WM_USER + 1;
 
 private:
-   HWND Hwnd;
-
    ABall Ball;
    ALevel Level;
    AsPlatform Platform;

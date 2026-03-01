@@ -14,7 +14,7 @@ class AActive_Brick
 {
 public:
    AActive_Brick(EBrick_Type brick_type);
-   void Fade_Out(HWND hwnd);
+   void Fade_Out();
    void Draw(HDC hdc);
 
    static void Setup_Colors();

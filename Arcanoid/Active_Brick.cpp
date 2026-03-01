@@ -13,7 +13,7 @@ AActive_Brick::AActive_Brick(EBrick_Type brick_type)
 {
 }
 //-----------------------------------------------------------------------------
-void AActive_Brick::Fade_Out(HWND hwnd)
+void AActive_Brick::Fade_Out()
 {
    //// infinitely fading for debug
    //if (Fade_Step >= Max_Fade_Step - 1)
@@ -24,7 +24,7 @@ void AActive_Brick::Fade_Out(HWND hwnd)
    else
       return;
 
-   InvalidateRect(hwnd, &Brick_Rect, FALSE);
+   InvalidateRect(AsConfig::Hwnd, &Brick_Rect, FALSE);
 }
 //-----------------------------------------------------------------------------
 void AActive_Brick::Draw(HDC hdc)

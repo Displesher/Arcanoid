@@ -3,13 +3,12 @@
 // AsEngine
 //-----------------------------------------------------------------------------
 AsEngine::AsEngine()
-   : Hwnd(0)
 {
 }
 //-----------------------------------------------------------------------------
 void AsEngine::Init_Engine(HWND hwnd)
 {// Setting up the game before start
-   Hwnd = hwnd;
+   AsConfig::Hwnd = hwnd;
 
    AActive_Brick::Setup_Colors();
 
@@ -18,8 +17,10 @@ void AsEngine::Init_Engine(HWND hwnd)
    Platform.Init();
    Border.Init();
 
-   Platform.Redraw(hwnd);
-   Ball.Redraw(hwnd);
+   Platform.Set_State(EPS_Roll_In);
+
+   Platform.Redraw();
+   Ball.Redraw();
 
    SetTimer(hwnd, Timer_ID , 1000 / AsConfig::FPS, nullptr);
 }
@@ -28,8 +29,6 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
 {// Draw game frame
 
    Level.Draw(hdc, paint_area);
-
-   Platform.Draw(hdc, paint_area);
 
    //int i;
    //for (i = 0; i < 16; i++)
@@ -41,8 +40,8 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
    //}
 
    Ball.Draw(hdc, paint_area);
-
    Border.Draw(hdc, paint_area);
+   Platform.Draw(hdc, paint_area);
 }
 //-----------------------------------------------------------------------------
 int AsEngine::On_Key_Down(EKey_Type key_type)
@@ -53,14 +52,14 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
       Platform.X_Pos -= Platform.X_Step;
       if (Platform.X_Pos < AsConfig::Border_X_Offset)
          Platform.X_Pos = AsConfig::Border_X_Offset;
-      Platform.Redraw(Hwnd);
+      Platform.Redraw();
       break;
 
    case EKT_Right:
       Platform.X_Pos += Platform.X_Step;
       if (Platform.X_Pos >= AsConfig::Max_X_Pos - Platform.Width + 1)
          Platform.X_Pos = AsConfig::Max_X_Pos - Platform.Width + 1;
-      Platform.Redraw(Hwnd);
+      Platform.Redraw();
       break;
 
    case EKT_Space:
@@ -75,10 +74,11 @@ int AsEngine::On_Timer()
 {
    ++AsConfig::Curent_Timer_Tick;
 
-   Ball.Move(Hwnd, &Level, Platform.X_Pos, Platform.Width);
-   Level.Active_Brick.Fade_Out(Hwnd);
+   Ball.Move(&Level, Platform.X_Pos, Platform.Width);
+   Level.Active_Brick.Fade_Out();
 
-   Platform.Act(Hwnd);
+   //if (AsConfig::Curent_Timer_Tick % 3 == 0)
+   Platform.Act();
 
    return 0;
 }
