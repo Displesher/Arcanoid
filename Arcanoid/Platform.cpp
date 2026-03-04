@@ -6,7 +6,7 @@ AsPlatform::AsPlatform()
    : Width(Normal_Inner_Width + Circle_Diameter),
    X_Pos((AsConfig::Max_X_Pos + AsConfig::Level_X_Offset - Width) / 2),
    X_Step(AsConfig::Global_Scale * 2),
-   Platform_State(EPS_Normal),
+   Platform_State(EPS_Ready),
    Inner_Width(Normal_Inner_Width),
    Rolling_Step(0),
    Meltdown_Y_Poses{},
@@ -34,6 +34,11 @@ void AsPlatform::Act()
    case EPS_Expand_Roll_In:
       Redraw();
    }
+}
+//-----------------------------------------------------------------------------
+EPlatform_State AsPlatform::Get_State()
+{
+   return Platform_State;
 }
 //-----------------------------------------------------------------------------
 void AsPlatform::Set_State(EPlatform_State new_state)
@@ -92,6 +97,7 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area)
 
    switch (Platform_State)
    {
+   case EPS_Ready:
    case EPS_Normal:
       Draw_Normal_State(hdc, paint_area);
       break;
@@ -166,6 +172,8 @@ void AsPlatform::Draw_Meltdown_State(HDC hdc, RECT &paint_area)
    int i, j;
    int x, y, y_offset;
    int area_width, area_height;
+   int moved_collumn_count = 0;
+   int max_platform_y_pos;
    COLORREF pixel;
    COLORREF bg_pixel =
       RGB(AsConfig::BG_Color.R, AsConfig::BG_Color.G, AsConfig::BG_Color.B);
@@ -173,8 +181,16 @@ void AsPlatform::Draw_Meltdown_State(HDC hdc, RECT &paint_area)
    area_width = Width * AsConfig::Global_Scale;
    area_height = Height * AsConfig::Global_Scale + 1;
 
+   max_platform_y_pos =
+      (AsConfig::Max_Y_Pos + 1) * AsConfig::Global_Scale + area_height;
+
    for (i = 0; i < area_width; i++)
    {
+      if (Meltdown_Y_Poses[i] > max_platform_y_pos)
+         continue;
+      else
+         ++moved_collumn_count;
+
       y_offset = AsConfig::Rand(Meltdown_Speed) + 1;
       x = Platform_Rect.left + i;
 
@@ -191,6 +207,9 @@ void AsPlatform::Draw_Meltdown_State(HDC hdc, RECT &paint_area)
       }
       Meltdown_Y_Poses[i] += y_offset;
    }
+   // there's nothing of pixels to move over screen
+   if (moved_collumn_count == 0)
+      Set_State(EPS_Missing);
 }
 //-----------------------------------------------------------------------------
 void AsPlatform::Draw_Roll_In_State(HDC hdc, RECT &paint_area)
@@ -253,7 +272,7 @@ void AsPlatform::Draw_Expanding_Roll_In_State(HDC hdc, RECT &paint_area)
    if (Inner_Width >= Normal_Inner_Width)
    {
       Inner_Width = Normal_Inner_Width;
-      Platform_State = EPS_Normal;
+      Platform_State = EPS_Ready;
       Redraw();
    }
 }

@@ -6,6 +6,7 @@
 enum EPlatform_State
 {
    EPS_Missing,
+   EPS_Ready,
    EPS_Normal,
    EPS_Meltdown,
    EPS_Roll_In,
@@ -19,6 +20,7 @@ public:
 
    void Init();
    void Act();
+   EPlatform_State Get_State();
    void Set_State(EPlatform_State new_state);
    void Redraw();
    void Draw(HDC hdc, RECT &paint_area);
@@ -36,6 +38,7 @@ private:
    void Draw_Expanding_Roll_In_State(HDC hdc, RECT &paint_area);
 
    EPlatform_State Platform_State;
+
    int Inner_Width;
    int Rolling_Step;
 

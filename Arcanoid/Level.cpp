@@ -21,7 +21,8 @@ char ALevel::Level_01[AsConfig::Level_Height][AsConfig::Level_Width] =
 // ALevel
 //-----------------------------------------------------------------------------
 ALevel::ALevel()
-   : Active_Brick(EBT_Red), Brick_Red_Pen(0), Brick_Blue_Pen(0), Letter_Pen(0),
+   : Has_Floor(false), Active_Brick(EBT_Red),
+   Brick_Red_Pen(0), Brick_Blue_Pen(0), Letter_Pen(0),
    Brick_Red_Brush(0), Brick_Blue_Brush(0),
    Level_Rect{}
 {
@@ -61,11 +62,11 @@ void ALevel::Draw(HDC hdc, RECT &paint_area)
    Active_Brick.Draw(hdc);
 }
 //-----------------------------------------------------------------------------
-void ALevel::Check_Level_Brick_Hit(int &next_y_pos, double &ball_y_direction,
-                                                            double ball_speed)
+void ALevel::Check_Level_Brick_Hit(
+            double &next_y_pos, double &ball_y_direction, double ball_speed)
 {// Reflection from the bricks
    int i, j;
-   int brick_y_pos = AsConfig::Level_Y_Offset +
+   double brick_y_pos = AsConfig::Level_Y_Offset +
       AsConfig::Level_Height * AsConfig::Cell_Height;
 
    for (i = AsConfig::Level_Height - 1; i >= 0; i--)
@@ -77,7 +78,7 @@ void ALevel::Check_Level_Brick_Hit(int &next_y_pos, double &ball_y_direction,
          if (next_y_pos < brick_y_pos)
          {
             ball_y_direction -= M_PI;
-            next_y_pos -= (int)(ball_speed * sin(ball_y_direction));
+            next_y_pos -= (ball_speed * sin(ball_y_direction));
          }
       }
       brick_y_pos -= AsConfig::Cell_Height;
