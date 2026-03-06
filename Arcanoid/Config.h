@@ -22,6 +22,7 @@ public:
       unsigned char r, unsigned char g, unsigned char b);
    static int Rand(int range);
 
+   static bool Level_Has_Floor;
    static int Curent_Timer_Tick;
    static const AColor BG_Color;
    static const AColor Red_Brick_Color, Blue_Brick_Color, Brick_Border_Color;

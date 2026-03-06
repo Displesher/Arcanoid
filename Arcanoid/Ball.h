@@ -10,25 +10,39 @@ enum EBall_State
    EBS_Lost
 };
 //-----------------------------------------------------------------------------
+class ABall;
+class AHit_Cheker
+{
+public:
+   virtual bool Check_Hit(double next_x_pos, double next_y_pos,
+                                                            ABall *ball) = 0;
+};
+//-----------------------------------------------------------------------------
 class ABall
 {
 public:
    ABall();
 
    void Init();
-   void Redraw();
    void Draw(HDC hdc, RECT &paint_area);
-   void Move(ALevel *level, int platform_x_pos, double platform_width);
+   void Move(int platform_x_pos, double platform_width,
+                                 ALevel *level, AHit_Cheker *hit_cheker);
    EBall_State Get_State();
-   void Set_State(EBall_State new_state, int x_pos);
+   void Set_State(EBall_State new_state, double x_pos);
+
+   double Ball_X_Direction, Ball_Y_Direction;
+
+   static const double Radius;
 
 private:
+   void Redraw();
+
    EBall_State Ball_State;
    HPEN Ball_Pen;
    HBRUSH Ball_Brush;
 
-   double Ball_X_Pos, Ball_Y_Pos;
-   double Ball_Speed, Ball_X_Direction, Ball_Y_Direction;
+   double Center_X_Pos, Center_Y_Pos;
+   double Ball_Speed, Rest_Distance;
 
    RECT Ball_Rect, Prev_Ball_Rect;
 

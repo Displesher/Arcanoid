@@ -8,6 +8,36 @@ AsBorder::AsBorder()
 {
 }
 //-----------------------------------------------------------------------------
+bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall* ball)
+{
+   bool got_hit = false;
+   int platform_y_pos = AsConfig::Platform_Y_Pos - AsConfig::Ball_Size;
+
+   // Reflection from the horizontal border
+   if (next_x_pos - ball->Radius < AsConfig::Border_X_Offset ||
+       next_x_pos + ball->Radius > AsConfig::Max_X_Pos)
+   {
+      got_hit = true;
+      ball->Ball_X_Direction += M_PI;
+   }
+   // Reflection from the vertical border
+   if (next_y_pos - ball->Radius < AsConfig::Border_Y_Offset
+      ||
+      // Reflection from the floor if exists
+      (next_y_pos + ball->Radius > AsConfig::Max_Y_Pos &&
+                                                AsConfig::Level_Has_Floor))
+   {
+      got_hit = true;
+      ball->Ball_Y_Direction -= M_PI;
+   }
+   // if level does not have the floor
+   if (next_y_pos - ball->Radius > (double)
+      (AsConfig::Max_Y_Pos + ball->Radius * 4.0))
+      ball->Set_State(EBS_Lost, next_x_pos);
+
+   return got_hit;
+}
+//-----------------------------------------------------------------------------
 void AsBorder::Init()
 {
    AsConfig::Create_Pen_Brush(Border_Blue_Pen, Border_Blue_Brush,
