@@ -41,6 +41,37 @@ EPlatform_State AsPlatform::Get_State()
    return Platform_State;
 }
 //-----------------------------------------------------------------------------
+bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
+{
+   double ball_right_edge = next_x_pos + ball->Radius;
+   double ball_left_edge = next_x_pos - ball->Radius;
+
+   if (next_y_pos + ball->Radius > AsConfig::Platform_Y_Pos &&
+       next_y_pos < AsConfig::Platform_Y_Pos + Circle_Diameter)
+   {
+      // ball's direction from the right
+      if ((ball_right_edge > (X_Pos + Width) &&
+         ball_left_edge < (X_Pos + Width))
+         ||
+       // or left side of platform
+         (ball_left_edge < X_Pos &&
+            ball_right_edge > X_Pos))
+      {
+         ball->Ball_Y_Direction -= M_PI;
+         ball->Ball_X_Direction -= M_PI;
+         return true;
+      }
+      // ball's direction on the top side of platform (inside platform's edges)
+      if (ball_right_edge > X_Pos &&
+         ball_left_edge < (X_Pos + Width))
+      {
+         ball->Ball_Y_Direction -= M_PI;
+         return true;
+      }
+   }
+      return false;
+}
+//-----------------------------------------------------------------------------
 void AsPlatform::Set_State(EPlatform_State new_state)
 {
    int i, len;

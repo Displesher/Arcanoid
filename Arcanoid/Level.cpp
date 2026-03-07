@@ -28,6 +28,29 @@ ALevel::ALevel()
 {
 }
 //-----------------------------------------------------------------------------
+bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
+{// Reflection from the bricks
+   int i, j;
+   double brick_y_pos = AsConfig::Level_Y_Offset +
+      AsConfig::Level_Height * AsConfig::Cell_Height;
+
+   for (i = AsConfig::Level_Height - 1; i >= 0; i--)
+   {
+      for (j = 0; j < AsConfig::Level_Width; j++)
+      {
+         if(Level_01[i][j] == 0)
+            continue;
+         if (next_y_pos - ball->Radius < brick_y_pos)
+         {
+            ball->Ball_Y_Direction -= M_PI;
+            return true;
+         }
+      }
+      brick_y_pos -= AsConfig::Cell_Height;
+   }
+   return false;
+}
+//-----------------------------------------------------------------------------
 void ALevel::Init()
 {
    Letter_Pen = CreatePen(PS_SOLID, 3, RGB(255, 245, 230));
@@ -60,29 +83,6 @@ void ALevel::Draw(HDC hdc, RECT &paint_area)
                                                  (EBrick_Type)Level_01[i][j]);
 
    Active_Brick.Draw(hdc);
-}
-//-----------------------------------------------------------------------------
-void ALevel::Check_Level_Brick_Hit(
-            double &next_y_pos, double &ball_y_direction, double ball_speed)
-{// Reflection from the bricks
-   int i, j;
-   double brick_y_pos = AsConfig::Level_Y_Offset +
-      AsConfig::Level_Height * AsConfig::Cell_Height;
-
-   for (i = AsConfig::Level_Height - 1; i >= 0; i--)
-   {
-      for (j = 0; j < AsConfig::Level_Width; j++)
-      {
-         if(Level_01[i][j] == 0)
-            continue;
-         if (next_y_pos < brick_y_pos)
-         {
-            ball_y_direction -= M_PI;
-            next_y_pos -= (ball_speed * sin(ball_y_direction));
-         }
-      }
-      brick_y_pos -= AsConfig::Cell_Height;
-   }
 }
 //-----------------------------------------------------------------------------
 void ALevel::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)

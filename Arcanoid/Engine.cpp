@@ -18,6 +18,10 @@ void AsEngine::Init_Engine(HWND hwnd)
    Ball.Init();
    Border.Init();
 
+   ABall::Add_Hit_Cheker(&Border);
+   ABall::Add_Hit_Cheker(&Platform);
+   ABall::Add_Hit_Cheker(&Level);
+
    Ball.Set_State(EBS_On_Platform, Platform.X_Pos + Platform.Width / 2);
 
    Platform.Set_State(EPS_Ready);
@@ -89,7 +93,7 @@ int AsEngine::On_Timer()
    switch (Game_State)
    {
    case EGS_Play_Level:
-      Ball.Move(Platform.X_Pos, Platform.Width, &Level, &Border);
+      Ball.Move(Platform.X_Pos, Platform.Width);
 
       if (Ball.Get_State() == EBS_Lost)
       {

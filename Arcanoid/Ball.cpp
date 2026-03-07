@@ -3,6 +3,8 @@
 // ABall
 const double ABall::Start_Ball_Y_Pos = AsConfig::Platform_Y_Pos - Radius;
 const double ABall::Radius = AsConfig::Ball_Size / 2.0;
+int ABall::Hit_Chekers_Count = 0;
+AHit_Cheker *ABall::Hit_Chekers[] = {};
 //-----------------------------------------------------------------------------
 ABall::ABall()
    : Ball_X_Direction(0.0), Ball_Y_Direction(0.0),
@@ -49,12 +51,11 @@ void ABall::Draw(HDC hdc, RECT &paint_area)
    }
 }
 //-----------------------------------------------------------------------------
-void ABall::Move(int platform_x_pos, double platform_width,
-                                    ALevel *level, AHit_Cheker *hit_cheker)
+void ABall::Move(int platform_x_pos, double platform_width)
 {
+   int i;
    bool got_hit;
    double next_x_pos, next_y_pos;
-   int platform_y_pos = AsConfig::Platform_Y_Pos - AsConfig::Ball_Size;
    double step_size = 1.0 / AsConfig::Global_Scale;
 
    switch (Ball_State)
@@ -69,21 +70,14 @@ void ABall::Move(int platform_x_pos, double platform_width,
       Rest_Distance += Ball_Speed;
       while (Rest_Distance >= step_size)
       {
+         got_hit = false;
          next_x_pos = Center_X_Pos + step_size * cos(Ball_X_Direction);
          next_y_pos = Center_Y_Pos - step_size * sin(Ball_Y_Direction);
 
-         // Reflection from borders
-         got_hit = hit_cheker->Check_Hit(next_x_pos, next_y_pos, this);
-         // Reflection from the platform
-         //if (next_y_pos - Radius > platform_y_pos &&
-         //   next_x_pos + Radius >= platform_x_pos &&
-         //   next_x_pos - Radius <= (platform_x_pos + platform_width))
-         //{
-         //      got_hit = true;
-         //      Ball_Y_Direction -= M_PI;
-         //}
-         // Reflection from the bricks
-         level->Check_Level_Brick_Hit(next_y_pos, Ball_Y_Direction, step_size);
+         // Reflection from borders, platform and bricks
+         for (i = 0; i < Hit_Chekers_Count; i++)
+            got_hit |= Hit_Chekers[i]->Check_Hit(next_x_pos, next_y_pos, this);
+
          Rest_Distance -= step_size;
 
          // ball continue moving if not collision
@@ -138,6 +132,14 @@ void ABall::Set_State(EBall_State new_state, double x_pos)
       break;
    }
    Ball_State = new_state;
+}
+//-----------------------------------------------------------------------------
+void ABall::Add_Hit_Cheker(AHit_Cheker *hit_cheker)
+{
+   if (Hit_Chekers_Count >= sizeof(Hit_Chekers) / sizeof(Hit_Chekers[0]))
+      return;
+
+   ABall::Hit_Chekers[Hit_Chekers_Count++] = hit_cheker;
 }
 //-----------------------------------------------------------------------------
 void ABall::Redraw()
