@@ -32,7 +32,6 @@ public:
    static HWND Hwnd;
 
    static const int Global_Scale = 3;
-   static const int Ball_Size = 4;
    static const int Level_Width = 12; // Width a level in cells
    static const int Level_Height = 14; // Height a level in cells
    static const int Level_X_Offset = 8;

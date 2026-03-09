@@ -2,12 +2,12 @@
 
 // ABall
 const double ABall::Start_Ball_Y_Pos = AsConfig::Platform_Y_Pos - Radius;
-const double ABall::Radius = AsConfig::Ball_Size / 2.0;
+const double ABall::Radius = 2.0;
 int ABall::Hit_Chekers_Count = 0;
 AHit_Cheker *ABall::Hit_Chekers[] = {};
 //-----------------------------------------------------------------------------
 ABall::ABall()
-   : Ball_X_Direction(0.0), Ball_Y_Direction(0.0),
+   : Ball_Direction(0.0),
    Ball_State(EBS_Normal), Ball_Pen(0), Ball_Brush(0),
    Center_X_Pos(0.0), Center_Y_Pos(Start_Ball_Y_Pos),
    Ball_Speed(0.0), Rest_Distance(0.0),
@@ -39,9 +39,9 @@ void ABall::Draw(HDC hdc, RECT &paint_area)
       Ball_Rect.left = (int)((Center_X_Pos - Radius) * AsConfig::Global_Scale);
       Ball_Rect.top = (int)((Center_Y_Pos - Radius) * AsConfig::Global_Scale);
       Ball_Rect.right =
-         (Ball_Rect.left + AsConfig::Ball_Size * AsConfig::Global_Scale);
+         (Ball_Rect.left + Radius * 2.0 * AsConfig::Global_Scale);
       Ball_Rect.bottom =
-         (Ball_Rect.top + AsConfig::Ball_Size * AsConfig::Global_Scale);
+         (Ball_Rect.top + Radius * 2.0 *AsConfig::Global_Scale);
 
    SelectObject(hdc, Ball_Pen);
    SelectObject(hdc, Ball_Brush);
@@ -71,8 +71,8 @@ void ABall::Move(int platform_x_pos, double platform_width)
       while (Rest_Distance >= step_size)
       {
          got_hit = false;
-         next_x_pos = Center_X_Pos + step_size * cos(Ball_X_Direction);
-         next_y_pos = Center_Y_Pos - step_size * sin(Ball_Y_Direction);
+         next_x_pos = Center_X_Pos + step_size * cos(Ball_Direction);
+         next_y_pos = Center_Y_Pos - step_size * sin(Ball_Direction);
 
          // Reflection from borders, platform and bricks
          for (i = 0; i < Hit_Chekers_Count; i++)
@@ -112,8 +112,7 @@ void ABall::Set_State(EBall_State new_state, double x_pos)
       Center_Y_Pos = Start_Ball_Y_Pos;
       Ball_Speed = 0.0;
       Rest_Distance = 0.0;
-      Ball_X_Direction = M_PI_4 / 2;
-      Ball_Y_Direction = M_PI_4 / 2;
+      Ball_Direction = M_PI_4 / 2.0;
       break;
 
 
@@ -122,8 +121,7 @@ void ABall::Set_State(EBall_State new_state, double x_pos)
       Center_Y_Pos = Start_Ball_Y_Pos;
       Ball_Speed = 3.0;
       Rest_Distance = 0.0;
-      Ball_X_Direction = M_PI_4 / 2;
-      Ball_Y_Direction = M_PI_4 / 2;
+      Ball_Direction = M_PI_4 / 2.0;
       break;
 
 
@@ -132,6 +130,32 @@ void ABall::Set_State(EBall_State new_state, double x_pos)
       break;
    }
    Ball_State = new_state;
+}
+//-----------------------------------------------------------------------------
+double ABall::Get_Direction()
+{
+   return Ball_Direction;
+}
+//-----------------------------------------------------------------------------
+void ABall::Set_Direction(double new_direction)
+{
+   const double pi_2 = 2.0 * M_PI;
+
+   while (new_direction < 0.0)
+      new_direction += pi_2;
+
+   while (new_direction > pi_2)
+      new_direction -= pi_2;
+
+   Ball_Direction = new_direction;
+}
+//-----------------------------------------------------------------------------
+void ABall::Reflect(bool from_horizontal)
+{
+   if (from_horizontal)
+      Set_Direction(-Ball_Direction);
+   else
+      Set_Direction(M_PI - Ball_Direction);
 }
 //-----------------------------------------------------------------------------
 void ABall::Add_Hit_Cheker(AHit_Cheker *hit_cheker)
@@ -148,10 +172,8 @@ void ABall::Redraw()
 
    Ball_Rect.left = (int)((Center_X_Pos - Radius) * AsConfig::Global_Scale);
    Ball_Rect.top = (int)((Center_Y_Pos - Radius) * AsConfig::Global_Scale);
-   Ball_Rect.right = (Ball_Rect.left + AsConfig::Ball_Size *
-                                                      AsConfig::Global_Scale);
-   Ball_Rect.bottom = (Ball_Rect.top + AsConfig::Ball_Size *
-                                                      AsConfig::Global_Scale);
+   Ball_Rect.right = (Ball_Rect.left + Radius * 2.0 * AsConfig::Global_Scale);
+   Ball_Rect.bottom = (Ball_Rect.top + Radius * 2.0 * AsConfig::Global_Scale);
 
    InvalidateRect(AsConfig::Hwnd, &Prev_Ball_Rect, FALSE);
    InvalidateRect(AsConfig::Hwnd, &Ball_Rect, FALSE);

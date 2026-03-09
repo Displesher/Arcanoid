@@ -55,21 +55,20 @@ bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
          ||
        // or left side of platform
          (ball_left_edge < X_Pos &&
-            ball_right_edge > X_Pos))
+         ball_right_edge > X_Pos))
       {
-         ball->Ball_Y_Direction -= M_PI;
-         ball->Ball_X_Direction -= M_PI;
+         ball->Set_Direction(ball->Get_Direction() - M_PI);
          return true;
       }
       // ball's direction on the top side of platform (inside platform's edges)
       if (ball_right_edge > X_Pos &&
          ball_left_edge < (X_Pos + Width))
       {
-         ball->Ball_Y_Direction -= M_PI;
+         ball->Reflect(true);
          return true;
       }
    }
-      return false;
+   return false;
 }
 //-----------------------------------------------------------------------------
 void AsPlatform::Set_State(EPlatform_State new_state)

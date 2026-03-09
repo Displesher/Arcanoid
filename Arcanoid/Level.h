@@ -23,12 +23,15 @@ public:
    AActive_Brick Active_Brick;
 
 private:
+   bool Hit_Circle_On_Line(double y, double center_circle_x,
+                              double left_x, double right_x, double radius);
    void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type);
    void Set_Brick_Letter_Color(bool is_switch_color,
       HPEN &front_pen, HPEN &back_pen,
       HBRUSH &front_brush, HBRUSH &back_brush);
    void Rotate_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type,
       ELetter_Type letter_type, int rotation_step);
+
 
    HPEN Brick_Red_Pen, Brick_Blue_Pen, Letter_Pen;
    HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
